@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <cmath>
+#include <vector>
 #include <gmpxx.h>
 
 const long INVALID_STATE = 1365;
@@ -110,21 +111,68 @@ mpz_class validStrings(long length) {
     return memo[length + 1][stringToInt("")];
 }
 
-int main(){
-    int testCases[] = {6, 56, 287, 299};
-    int length;
-    for (int testLength : testCases){
-        std::cout << "Number of valid strings of length " << testLength << ": " << validStrings(testLength) << std::endl;
+mpz_class binomialCoefficient(int n, int k){
+    if(k > n){
+        return 0;
     }
+    mpz_class result = 1;
+    for(int i = 0; i < k; i++){
+        result *= (n - i);
+        result /= (i + 1);
+    }
+    return result;
+}
 
-    std::cout << "Enter the length of the strings (0 to 300). n = ";
-    std::cin >> length;
-    if(length >= 0 && length <= 300){
-        std::cout << "Number of valid strings of length " << length << ": " << validStrings(length) << std::endl;
+// find number of strings with a in the middle
+mpz_class countStringsWithMiddleA(int n){
+    if(n % 2 == 0){
+        return 0;
+    }
+    int halfLength = n / 2; // chars before/after 'a'
+    mpz_class total = pow(3, halfLength * 2); // remaining chars are b, c, or d
+    return total;
+}
+
+// find number of strings n that have exactly m amount of 'a'
+mpz_class countStringsWithMAs(int n, int m){
+    if (m > n || m < 0){
+        return 0;
+    }
+    int otherChars = n - m; // remaining chars (b, c, d)
+    mpz_class combinations = binomialCoefficient(n, m); // ways to place 'a'
+    mpz_class total = combinations * pow(3, otherChars); // remaining filled with b, c, d
+    return total;
+}
+
+int main(){
+    int option;
+    std::cout << "Select option:\n";
+    std::cout << "1: Count strings with 'a' as middle symbol\n";
+    std::cout << "2: Count strings with exactly m occurrences of 'a'\n";
+    std::cin >> option;
+
+    if (option == 1) {
+        int n;
+        std::cout << "Enter an odd length n: ";
+        std::cin >> n;
+        if(n % 2 == 0){
+            std::cout << "Length must be odd.\n";
+        }
+        else{
+            std::cout << "Number of strings: " << countStringsWithMiddleA(n) << "\n";
+        }
+    }
+    else if(option == 2){
+        int n, m;
+        std::cout << "Enter length n: ";
+        std::cin >> n;
+        std::cout << "Enter number of occurrences m: ";
+        std::cin >> m;
+        std::cout << "Number of strings: " << countStringsWithMAs(n, m) << "\n";
     }
     else{
-        std::cerr << "Error: Invalid input. Please provide a length between 0 to 300." << std::endl;
-        return 1;
+        std::cout << "Invalid option.\n";
     }
+
     return 0;
 }
